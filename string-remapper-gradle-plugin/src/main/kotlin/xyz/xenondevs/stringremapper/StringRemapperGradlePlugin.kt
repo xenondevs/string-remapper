@@ -29,8 +29,12 @@ class StringRemapperGradlePlugin : Plugin<Project> {
             }
         }
         
+        // revertRemapStrings task
+        val cleanupTask = project.tasks.register<StringRemapRevertTask>("revertRemapStrings") { mustRunAfter(jarTask) }
+        cleanupTask.configure { setInputClasses(this.inputClasses) }
+        
         // remapStrings task
-        val remapTask = project.tasks.register<StringRemapTask>("remapStrings") { dependsOn(classesTask) }
+        val remapTask = project.tasks.register<StringRemapTask>("remapStrings") { dependsOn(classesTask); finalizedBy(cleanupTask) }
         remapTask.configure {
             val (mojangMappings, spigotMappings) = resolveMappings(project, extension.spigotVersion.get())
             this.mojangMappings.set(mojangMappings)
@@ -40,11 +44,6 @@ class StringRemapperGradlePlugin : Plugin<Project> {
             setInputClasses(this.inputClasses)
         }
         classesTask.finalizedBy(remapTask)
-        
-        // revertRemapStrings task
-        val cleanupTask = project.tasks.register<StringRemapRevertTask>("revertRemapStrings") { dependsOn(jarTask) }
-        cleanupTask.configure { setInputClasses(this.inputClasses) }
-        jarTask.finalizedBy(cleanupTask)
     }
     
     private fun resolveMappings(project: Project, version: String): Pair<File, File> {
