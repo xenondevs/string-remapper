@@ -21,7 +21,7 @@ class StringRemapperGradlePlugin : Plugin<Project> {
             if (extension.inputClasses.isPresent && extension.inputClasses.get().isNotEmpty()) {
                 inputClasses.set(extension.inputClasses.get().map(::File))
             } else {
-                println("No input classes specified, defaulting to 'classes/main/kotlin' and 'classes/main/java'")
+                project.logger.debug("No input classes specified, defaulting to 'classes/main/kotlin' and 'classes/main/java'")
                 inputClasses.set(listOf(
                     project.buildDir.resolve("classes/kotlin/main"),
                     project.buildDir.resolve("classes/java/main")
@@ -40,7 +40,6 @@ class StringRemapperGradlePlugin : Plugin<Project> {
             this.mojangMappings.set(mojangMappings)
             this.spigotMappings.set(spigotMappings)
             this.goal.set(RemapGoal.valueOf(extension.remapGoal.get().uppercase()))
-            this.classes.set(extension.classes)
             setInputClasses(this.inputClasses)
         }
         classesTask.finalizedBy(remapTask)

@@ -9,8 +9,6 @@ abstract class StringRemapExtension {
     
     abstract val inputClasses: ListProperty<String>
     
-    abstract val classes: ListProperty<String>
-    
     abstract val remapGoal: Property<String>
     
 }

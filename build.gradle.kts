@@ -1,6 +1,6 @@
 subprojects { 
     group = "xyz.xenondevs.string-remapper"
-    version = "1.0"
+    version = "1.1"
     
     repositories { 
         mavenCentral()

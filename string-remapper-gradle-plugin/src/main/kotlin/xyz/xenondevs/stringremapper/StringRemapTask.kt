@@ -25,9 +25,6 @@ abstract class StringRemapTask : DefaultTask() {
     @get:Input
     abstract val goal: Property<RemapGoal>
     
-    @get:Input
-    abstract val classes: ListProperty<String>
-    
     @Internal
     val remappedClasses = HashMap<File, ByteArray>()
     
