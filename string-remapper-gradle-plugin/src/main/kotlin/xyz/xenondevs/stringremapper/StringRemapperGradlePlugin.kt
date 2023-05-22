@@ -17,7 +17,18 @@ class StringRemapperGradlePlugin : Plugin<Project> {
         
         // extension
         val extension = project.extensions.create<StringRemapExtension>("remapStrings")
-        fun setInputClasses(inputClasses: ListProperty<File>) {
+        
+        // revertRemapStrings task
+        val cleanupTask = project.tasks.register<StringRemapRevertTask>("revertRemapStrings") { mustRunAfter(jarTask) }
+        
+        // remapStrings task
+        val remapTask = project.tasks.register<StringRemapTask>("remapStrings") { dependsOn(classesTask); finalizedBy(cleanupTask) }
+        remapTask.configure {
+            val (mojangMappings, spigotMappings) = resolveMappings(project, extension.spigotVersion.get())
+            this.mojangMappings.set(mojangMappings)
+            this.spigotMappings.set(spigotMappings)
+            goal.set(RemapGoal.valueOf(extension.remapGoal.get().uppercase()))
+            
             if (extension.inputClasses.isPresent && extension.inputClasses.get().isNotEmpty()) {
                 inputClasses.set(extension.inputClasses.get().map(::File))
             } else {
@@ -27,20 +38,12 @@ class StringRemapperGradlePlugin : Plugin<Project> {
                     project.buildDir.resolve("classes/java/main")
                 ))
             }
-        }
-        
-        // revertRemapStrings task
-        val cleanupTask = project.tasks.register<StringRemapRevertTask>("revertRemapStrings") { mustRunAfter(jarTask) }
-        cleanupTask.configure { setInputClasses(this.inputClasses) }
-        
-        // remapStrings task
-        val remapTask = project.tasks.register<StringRemapTask>("remapStrings") { dependsOn(classesTask); finalizedBy(cleanupTask) }
-        remapTask.configure {
-            val (mojangMappings, spigotMappings) = resolveMappings(project, extension.spigotVersion.get())
-            this.mojangMappings.set(mojangMappings)
-            this.spigotMappings.set(spigotMappings)
-            this.goal.set(RemapGoal.valueOf(extension.remapGoal.get().uppercase()))
-            setInputClasses(this.inputClasses)
+            
+            if (extension.outputClasses.isPresent && extension.outputClasses.get().isNotEmpty()) {
+                outputClasses.set(extension.outputClasses.get().map(::File))
+            } else {
+                outputClasses.set(emptyList())
+            }
         }
         classesTask.finalizedBy(remapTask)
     }

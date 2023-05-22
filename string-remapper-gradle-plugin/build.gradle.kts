@@ -1,13 +1,12 @@
 plugins {
-    @Suppress("DSL_SCOPE_VIOLATION")
-    id("org.jetbrains.kotlin.jvm") version libs.versions.kotlin
+    alias(libs.plugins.kotlin)
     `java-gradle-plugin`
     `kotlin-dsl`
     `maven-publish`
 }
 
 dependencies {
-    implementation(project(":string-remapper-core"))
+    implementation(project(":string-remapper-plugin"))
 }
 
 gradlePlugin {

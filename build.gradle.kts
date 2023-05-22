@@ -1,6 +1,6 @@
 subprojects { 
     group = "xyz.xenondevs.string-remapper"
-    version = "1.1"
+    version = "1.2"
     
     repositories { 
         mavenCentral()
@@ -14,5 +14,4 @@ subprojects {
             archiveClassifier.set("sources")
         }
     }
-    
 }

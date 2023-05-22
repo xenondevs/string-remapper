@@ -283,8 +283,9 @@ class Mappings(
             val lookupType = matchResult.groupValues[2]
             val useSlashes = matchResult.groups[3] != null
             
-            var resolvedLookup = if (advancedMode) {
-                when (lookupType) {
+            var resolvedLookup: String
+            if (advancedMode) {
+                resolvedLookup = when (lookupType) {
                     "C" -> resolveClassLookup(lookup, goal)
                     "M" -> resolveMethodLookup(lookup, goal)
                     "F" -> resolveFieldLookup(lookup, goal)
@@ -292,7 +293,7 @@ class Mappings(
                 }
             } else {
                 lookup = lookup.replace('.', '/')
-                when (lookupType) {
+                resolvedLookup = when (lookupType) {
                     "C" -> resolveClassLookup(lookup, goal)
                     "M" -> resolveSimpleMethodLookup(lookup, goal)
                     "F" -> resolveSimpleFieldLookup(lookup, goal)
