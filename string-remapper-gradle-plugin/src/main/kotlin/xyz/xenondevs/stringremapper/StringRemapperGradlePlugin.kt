@@ -8,6 +8,8 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.register
 import java.io.File
+import java.nio.file.Path
+import kotlin.io.path.exists
 
 class StringRemapperGradlePlugin : Plugin<Project> {
     
@@ -33,9 +35,9 @@ class StringRemapperGradlePlugin : Plugin<Project> {
                 inputClasses.set(extension.inputClasses.get().map(::File))
             } else {
                 project.logger.debug("No input classes specified, defaulting to 'classes/main/kotlin' and 'classes/main/java'")
-                inputClasses.set(listOf(
-                    project.buildDir.resolve("classes/kotlin/main"),
-                    project.buildDir.resolve("classes/java/main")
+                inputClasses.set(listOfNotNull(
+                    project.buildDir.resolve("classes/kotlin/main").takeIf(File::exists),
+                    project.buildDir.resolve("classes/java/main").takeIf(File::exists)
                 ))
             }
             
