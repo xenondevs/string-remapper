@@ -1,5 +1,6 @@
 package xyz.xenondevs.stringremapper
 
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import xyz.xenondevs.commons.gson.fromJson
 import xyz.xenondevs.commons.gson.getArray
@@ -194,7 +195,7 @@ class Mappings(
                     // no exact spigot mapping, search for outer class mapping
                     var outerObf = obf
                     var innerObf = ""
-                    while('$' in outerObf) {
+                    while ('$' in outerObf) {
                         innerObf += "$" + outerObf.substringAfterLast('$') + innerObf
                         outerObf = outerObf.substringBeforeLast('$')
                         val outerSpigot = spigotMappings[outerObf]
@@ -213,26 +214,17 @@ class Mappings(
         }
         
         fun loadFromJson(mappingsFile: File): Mappings {
-            val obj = mappingsFile.parseJson() as JsonObject
-            return loadFromJson(obj)
+            return GSON.fromJson(mappingsFile.bufferedReader())!!
         }
         
-        fun loadFromJson(obj: JsonObject): Mappings {
-            return Mappings(
-                GSON.fromJson<HashMap<String, String>>(obj.get("classMappings"))!!,
-                GSON.fromJson<HashMap<String, String>>(obj.get("fieldMappings"))!!,
-                GSON.fromJson<HashMap<String, String>>(obj.get("methodMappings"))!!
-            )
+        fun loadFromJson(element: JsonElement): Mappings {
+            return GSON.fromJson(element)!!
         }
         
     }
     
     fun writeToJson(file: File) {
-        val obj = JsonObject()
-        obj.add("classMappings", GSON.toJsonTree(classMappings))
-        obj.add("fieldMappings", GSON.toJsonTree(fieldMappings))
-        obj.add("methodMappings", GSON.toJsonTree(methodMappings))
-        file.writeText(GSON.toJson(obj))
+        file.writeText(GSON.toJson(this))
     }
     
     private fun resolveClassLookup(className: String, goal: RemapGoal): String {
@@ -247,7 +239,7 @@ class Mappings(
     // class.field.desc
     private fun resolveFieldLookup(fieldMapping: String, goal: RemapGoal): String {
         if (goal == RemapGoal.SPIGOT) {
-            return fieldMappings[fieldMapping] 
+            return fieldMappings[fieldMapping]
                 ?: throw IllegalArgumentException("Could not resolve field lookup: $fieldMapping")
         }
         
@@ -286,7 +278,7 @@ class Mappings(
     
     fun processString(value: String, goal: RemapGoal): String {
         var result = value
-    
+        
         generateSequence {
             REMAP_INSTRUCTION_BEGIN_PATTERN.find(result)
         }.forEach { matchResult ->

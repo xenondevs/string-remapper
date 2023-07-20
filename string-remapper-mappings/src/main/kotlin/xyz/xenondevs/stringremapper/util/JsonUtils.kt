@@ -1,7 +1,10 @@
 package xyz.xenondevs.stringremapper.util
 
 import com.google.gson.GsonBuilder
+import xyz.xenondevs.commons.gson.registerTypeAdapter
+import xyz.xenondevs.stringremapper.serialization.MappingsTypeAdapter
 
-val GSON = GsonBuilder()
+internal val GSON = GsonBuilder()
     .setPrettyPrinting()
+    .registerTypeAdapter(MappingsTypeAdapter)
     .create()
