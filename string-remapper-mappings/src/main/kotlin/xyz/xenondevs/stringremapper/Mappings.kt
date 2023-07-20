@@ -1,7 +1,6 @@
 package xyz.xenondevs.stringremapper
 
 import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import xyz.xenondevs.commons.gson.fromJson
 import xyz.xenondevs.commons.gson.getArray
 import xyz.xenondevs.commons.gson.getObject

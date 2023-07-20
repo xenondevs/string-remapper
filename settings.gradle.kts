@@ -1,5 +1,6 @@
 rootProject.name = "string-remapper"
 
+include("string-remapper-mappings")
 include("string-remapper-core")
 include("string-remapper-plugin")
 include("string-remapper-gradle-plugin")

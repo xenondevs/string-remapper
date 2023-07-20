@@ -4,8 +4,8 @@ plugins {
 }
 
 dependencies {
-    api(project(":string-remapper-mappings"))
-    implementation("xyz.xenondevs.bytebase:ByteBase:0.4.4")
+    api("com.google.code.gson:gson:2.10.1")
+    api("xyz.xenondevs.commons:commons-gson:1.0-SNAPSHOT")
 }
 
 publishing {
