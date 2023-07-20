@@ -1,15 +1,22 @@
 package xyz.xenondevs.stringremapper
 
 import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import xyz.xenondevs.commons.gson.fromJson
+import xyz.xenondevs.commons.gson.getArray
+import xyz.xenondevs.commons.gson.getObject
+import xyz.xenondevs.commons.gson.getString
 import xyz.xenondevs.commons.gson.parseJson
 import xyz.xenondevs.stringremapper.util.GSON
 import xyz.xenondevs.stringremapper.util.TypeUtils
 import java.io.BufferedReader
 import java.io.File
 import java.io.Serializable
+import java.net.URL
 import java.nio.file.Path
 import kotlin.io.path.bufferedReader
+import kotlin.io.path.createDirectories
+import kotlin.io.path.writeText
 
 private val MOJANG_DEFINE_CLASS_PATTERN = Regex("""^(\S*) -> (\S*):$""")
 private val MOJANG_DEFINE_FIELD_PATTERN = Regex("""^ {4}(\S*) ([^\s()]*) -> (\S*)$""")
@@ -139,6 +146,32 @@ class Mappings(
     private val methodNameMappings: Map<String, String> by lazy { methodMappings.mapKeysTo(HashMap()) { (key, _) -> key.substringBeforeLast('(') } }
     
     companion object {
+        
+        private const val SPIGOT_MAPPINGS_URL = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/raw/mappings/bukkit-%s-cl.csrg"
+        private const val VERSION_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
+        
+        fun downloadMappings(version: String, dir: File): Pair<File, File> =
+            downloadMappings(version, dir.toPath()).let { it.first.toFile() to it.second.toFile() }
+        
+        fun downloadMappings(version: String, dir: Path): Pair<Path, Path> {
+            dir.createDirectories()
+            
+            val spigotMappingsFile = dir.resolve("maps-spigot.csrg")
+            val mojangMappingsFile = dir.resolve("maps-mojang.txt")
+            
+            val versionManifest = URL(VERSION_MANIFEST_URL).openStream().parseJson() as JsonObject
+            val versionUrl = versionManifest.getArray("versions")
+                .map { it as JsonObject }
+                .first { it.getString("id") == version }
+                .getString("url")
+            val versionObj = URL(versionUrl).openStream().parseJson() as JsonObject
+            val serverMappingsUrl = versionObj.getObject("downloads").getObject("server_mappings").getString("url")
+            
+            mojangMappingsFile.writeText(URL(serverMappingsUrl).readText())
+            spigotMappingsFile.writeText(URL(SPIGOT_MAPPINGS_URL.format(version)).readText())
+            
+            return mojangMappingsFile to spigotMappingsFile
+        }
         
         fun load(mojangMappingsFile: File, spigotMappingsFile: File): Mappings =
             load(mojangMappingsFile.bufferedReader(), spigotMappingsFile.bufferedReader())
