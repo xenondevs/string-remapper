@@ -3,13 +3,10 @@ package xyz.xenondevs.stringremapper
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
-import org.gradle.api.provider.ListProperty
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.register
 import java.io.File
-import java.nio.file.Path
-import kotlin.io.path.exists
 
 class StringRemapperGradlePlugin : Plugin<Project> {
     
@@ -26,10 +23,8 @@ class StringRemapperGradlePlugin : Plugin<Project> {
         // remapStrings task
         val remapTask = project.tasks.register<StringRemapTask>("remapStrings") { dependsOn(classesTask); finalizedBy(cleanupTask) }
         remapTask.configure {
-            val (mojangMappings, spigotMappings) = resolveMappings(project, extension.spigotVersion.get())
-            this.mojangMappings.set(mojangMappings)
-            this.spigotMappings.set(spigotMappings)
-            goal.set(RemapGoal.valueOf(extension.remapGoal.get().uppercase()))
+            this.gameVersion.set(extension.gameVersion)
+            goal.set(extension.remapGoal.map { RemapGoal.valueOf(it.uppercase()) })
             
             if (extension.inputClasses.isPresent && extension.inputClasses.get().isNotEmpty()) {
                 inputClasses.set(extension.inputClasses.get().map(::File))
@@ -48,12 +43,6 @@ class StringRemapperGradlePlugin : Plugin<Project> {
             }
         }
         classesTask.finalizedBy(remapTask)
-    }
-    
-    private fun resolveMappings(project: Project, version: String): Pair<File, File> {
-        val mojangMappings = project.dependencies.create("org.spigotmc:minecraft-server:$version:maps-mojang@txt").getFile(project)
-        val spigotMappings = project.dependencies.create("org.spigotmc:minecraft-server:$version:maps-spigot@csrg").getFile(project)
-        return Pair(mojangMappings, spigotMappings)
     }
     
     private fun Dependency.getFile(project: Project) =

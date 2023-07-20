@@ -5,7 +5,7 @@ import org.gradle.api.provider.Property
 
 abstract class StringRemapExtension {
 
-    abstract val spigotVersion: Property<String>
+    abstract val gameVersion: Property<String>
     
     abstract val inputClasses: ListProperty<String>
     

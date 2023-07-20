@@ -35,8 +35,8 @@ class StringRemapMojo : AbstractMojo() {
     @Parameter(defaultValue = "\${project.remoteProjectRepositories}", readonly = true, required = true)
     private val repositories: List<RemoteRepository>? = null
     
-    @Parameter(name = "spigotVersion", required = true)
-    private lateinit var spigotVersion: String
+    @Parameter(name = "version", required = true)
+    private lateinit var version: String
     
     @Parameter(name = "goal", required = true)
     private lateinit var goal: String
@@ -52,8 +52,6 @@ class StringRemapMojo : AbstractMojo() {
         SLF4JBridgeHandler.install()
         val logger = LoggerFactory.getLogger(this::class.java)
         
-        val mojangMappings = resolveArtifact("org.spigotmc:minecraft-server:txt:maps-mojang:$spigotVersion").file
-        val spigotMappings = resolveArtifact("org.spigotmc:minecraft-server:csrg:maps-spigot:$spigotVersion").file
         val classesIn = classesIn.map(::File)
         val classesOut = classesOut.map(::File)
         val goal = RemapGoal.valueOf(goal.uppercase())
@@ -66,7 +64,7 @@ class StringRemapMojo : AbstractMojo() {
             logger, 
             File(project.build.directory),
             classesIn, classesOut, 
-            mojangMappings, spigotMappings,
+            version,
             goal
         ).remap()
     }

@@ -8,8 +8,7 @@ class ProjectRemapper(
     private val buildDir: File,
     private val classesIn: List<File>,
     private val classesOut: List<File>,
-    private val mojangMappings: File,
-    private val spigotMappings: File,
+    private val version: String,
     private val goal: RemapGoal
 ) {
     
@@ -34,6 +33,7 @@ class ProjectRemapper(
         val mappingsFile = File(buildDir, "mappings.json")
         val mappings: Mappings
         if (!mappingsFile.exists()) {
+            val (mojangMappings, spigotMappings) = Mappings.downloadMappings(version, buildDir)
             mappings = Mappings.load(mojangMappings, spigotMappings)
             mappings.writeToJson(mappingsFile)
         } else {

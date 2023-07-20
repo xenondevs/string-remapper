@@ -1,11 +1,9 @@
 package xyz.xenondevs.stringremapper
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.withType
@@ -19,11 +17,8 @@ abstract class StringRemapTask : DefaultTask() {
     @get:Input
     abstract val outputClasses: ListProperty<File>
     
-    @get:InputFile
-    abstract val spigotMappings: RegularFileProperty
-    
-    @get:InputFile
-    abstract val mojangMappings: RegularFileProperty
+    @get:Input
+    abstract val gameVersion: Property<String>
     
     @get:Input
     abstract val goal: Property<RemapGoal>
@@ -38,7 +33,7 @@ abstract class StringRemapTask : DefaultTask() {
             project.buildDir,
             inputClasses.get(), 
             outputClasses.get(),
-            mojangMappings.asFile.get(), spigotMappings.asFile.get(),
+            gameVersion.get(),
             goal.get()
         )
         remapper.remap()
