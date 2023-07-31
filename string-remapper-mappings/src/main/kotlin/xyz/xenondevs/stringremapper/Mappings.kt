@@ -16,6 +16,7 @@ import java.net.URL
 import java.nio.file.Path
 import kotlin.io.path.bufferedReader
 import kotlin.io.path.createDirectories
+import kotlin.io.path.exists
 import kotlin.io.path.writeText
 
 private val MOJANG_DEFINE_CLASS_PATTERN = Regex("""^(\S*) -> (\S*):$""")
@@ -159,6 +160,15 @@ class Mappings(
             val spigotMappingsFile = dir.resolve("maps-spigot.csrg")
             val mojangMappingsFile = dir.resolve("maps-mojang.txt")
             
+            downloadMappings(version, spigotMappingsFile, mojangMappingsFile)
+            
+            return mojangMappingsFile to spigotMappingsFile
+        }
+        
+        fun downloadMappings(version: String, mojangMappingsFile: File, spigotMappingsFile: File) =
+            downloadMappings(version, spigotMappingsFile.toPath(), mojangMappingsFile.toPath())
+        
+        fun downloadMappings(version: String, mojangMappingsFile: Path, spigotMappingsFile: Path) {
             val versionManifest = URL(VERSION_MANIFEST_URL).openStream().parseJson() as JsonObject
             val versionUrl = versionManifest.getArray("versions")
                 .map { it as JsonObject }
@@ -169,8 +179,6 @@ class Mappings(
             
             mojangMappingsFile.writeText(URL(serverMappingsUrl).readText())
             spigotMappingsFile.writeText(URL(SPIGOT_MAPPINGS_URL.format(version)).readText())
-            
-            return mojangMappingsFile to spigotMappingsFile
         }
         
         fun load(mojangMappingsFile: File, spigotMappingsFile: File): Mappings =
@@ -213,19 +221,37 @@ class Mappings(
             return Mappings(classMappings, mojangMappings.methodMappings, mojangMappings.fieldMappings)
         }
         
-        fun loadFromJson(mappingsFile: File): Mappings {
-            return GSON.fromJson(mappingsFile.bufferedReader())!!
+        fun loadOrDownload(version: String, mojangMappingsFile: File, spigotMappingsFile: File, mappingsCache: File): Mappings =
+            loadOrDownload(version, mojangMappingsFile.toPath(), spigotMappingsFile.toPath(), mappingsCache.toPath())
+        
+        fun loadOrDownload(version: String, mojangMappingsFile: Path, spigotMappingsFile: Path, mappingsCache: Path): Mappings {
+            if (mappingsCache.exists())
+                return loadFromJson(mappingsCache)
+            
+            if (!spigotMappingsFile.exists() || !mojangMappingsFile.exists())
+                downloadMappings(version, mojangMappingsFile, spigotMappingsFile)
+            
+            val mappings = load(mojangMappingsFile, spigotMappingsFile)
+            mappings.writeToJson(mappingsCache)
+            return mappings
         }
         
-        fun loadFromJson(element: JsonElement): Mappings {
-            return GSON.fromJson(element)!!
-        }
+        fun loadFromJson(mappingsFile: File): Mappings =
+            loadFromJson(mappingsFile.toPath())
+        
+        fun loadFromJson(mappingsFile: Path): Mappings =
+            GSON.fromJson(mappingsFile.bufferedReader())!!
+        
+        fun loadFromJson(element: JsonElement): Mappings =
+            GSON.fromJson(element)!!
         
     }
     
-    fun writeToJson(file: File) {
+    fun writeToJson(file: File) =
+        writeToJson(file.toPath())
+    
+    fun writeToJson(file: Path) =
         file.writeText(GSON.toJson(this))
-    }
     
     private fun resolveClassLookup(className: String, goal: RemapGoal): String {
         if (goal == RemapGoal.SPIGOT) {
