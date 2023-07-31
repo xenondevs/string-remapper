@@ -138,8 +138,8 @@ internal class SpigotMappingsParser : MappingsParser {
 
 class Mappings(
     val classMappings: Map<String, String>,
-    val fieldMappings: Map<String, String>,
-    val methodMappings: Map<String, String>
+    val methodMappings: Map<String, String>,
+    val fieldMappings: Map<String, String>
 ) : Serializable {
     
     private val fieldNameMappings: Map<String, String> by lazy { fieldMappings.mapKeysTo(HashMap()) { (key, _) -> key.substringBeforeLast('.') } }
@@ -210,7 +210,7 @@ class Mappings(
                 classMappings[mojang] = obf
             }
             
-            return Mappings(classMappings, mojangMappings.fieldMappings, mojangMappings.methodMappings)
+            return Mappings(classMappings, mojangMappings.methodMappings, mojangMappings.fieldMappings)
         }
         
         fun loadFromJson(mappingsFile: File): Mappings {
