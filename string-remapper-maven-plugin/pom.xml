@@ -6,7 +6,7 @@
 
     <groupId>xyz.xenondevs.string-remapper</groupId>
     <artifactId>string-remapper-maven-plugin</artifactId>
-    <version>1.5</version>
+    <version>1.6</version>
     <packaging>maven-plugin</packaging>
 
     <properties>
