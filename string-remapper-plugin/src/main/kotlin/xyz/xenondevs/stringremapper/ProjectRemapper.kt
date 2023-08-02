@@ -30,16 +30,12 @@ class ProjectRemapper(
     }
     
     private fun getRemapper(): FileRemapper {
-        val mappingsFile = File(buildDir, "mappings.json")
-        val mappings: Mappings
-        if (!mappingsFile.exists()) {
-            val (mojangMappings, spigotMappings) = Mappings.downloadMappings(version, buildDir)
-            mappings = Mappings.load(mojangMappings, spigotMappings)
-            mappings.writeToJson(mappingsFile)
-        } else {
-            mappings = Mappings.loadFromJson(mappingsFile)
-        }
-        
+        if (!buildDir.exists())
+            buildDir.mkdirs()
+        val mojangMappings = File(buildDir, "maps-mojang.txt")
+        val spigotMappings = File(buildDir, "maps-spigot.csrg")
+        val mappingsCache = File(buildDir, "mappings.json")
+        val mappings = Mappings.loadOrDownload(version, mojangMappings, spigotMappings, mappingsCache)
         return FileRemapper(mappings, goal)
     }
     

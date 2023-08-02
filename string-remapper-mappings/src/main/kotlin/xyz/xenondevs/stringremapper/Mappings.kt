@@ -156,12 +156,9 @@ class Mappings(
         
         fun downloadMappings(version: String, dir: Path): Pair<Path, Path> {
             dir.createDirectories()
-            
-            val spigotMappingsFile = dir.resolve("maps-spigot.csrg")
             val mojangMappingsFile = dir.resolve("maps-mojang.txt")
-            
-            downloadMappings(version, spigotMappingsFile, mojangMappingsFile)
-            
+            val spigotMappingsFile = dir.resolve("maps-spigot.csrg")
+            downloadMappings(version, mojangMappingsFile, spigotMappingsFile)
             return mojangMappingsFile to spigotMappingsFile
         }
         
