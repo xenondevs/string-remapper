@@ -44,19 +44,25 @@ class ProjectRemapper(
             val outDir = if (classesOut.isEmpty()) dir else classesOut[idx]
             
             dir.walkTopDown()
-                .filter { it.isFile && it.extension == "class" }
+                .filter { it.isFile }
                 .forEach { file ->
                     val relPath = file.relativeTo(dir).path
                     val toFile = File(outDir, relPath)
                     try {
-                        val bin = file.readBytes()
-                        val newBin = remapper.remap(bin.inputStream())
-                        if (newBin != null) {
-                            remappedClasses[toFile] = bin
-                            toFile.parentFile.mkdirs()
-                            toFile.writeBytes(newBin)
-                            logger.debug("Remapped strings in {}", relPath)
-                        } else if (file != toFile) {
+                        if (file.extension == "class") {
+                            val bin = file.readBytes()
+                            val newBin = remapper.remap(bin.inputStream())
+                            if (newBin != null) {
+                                remappedClasses[toFile] = bin
+                                toFile.parentFile.mkdirs()
+                                toFile.writeBytes(newBin)
+                                logger.debug("Remapped strings in {}", relPath)
+                                return@forEach
+                            }
+                        }
+                        
+                        
+                        if (file != toFile) {
                             file.copyTo(toFile, true)
                         }
                     } catch (t: Throwable) {
