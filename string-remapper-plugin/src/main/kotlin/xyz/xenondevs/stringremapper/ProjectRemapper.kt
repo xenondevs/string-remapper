@@ -53,13 +53,14 @@ class ProjectRemapper(
                         val newBin = remapper.remap(bin.inputStream())
                         if (newBin != null) {
                             remappedClasses[toFile] = bin
+                            toFile.parentFile.mkdirs()
                             toFile.writeBytes(newBin)
                             logger.debug("Remapped strings in {}", relPath)
                         } else if (file != toFile) {
                             file.copyTo(toFile, true)
                         }
                     } catch (t: Throwable) {
-                        logger.error("An exception occurred while remapping $relPath", t)
+                        throw Exception("An exception occurred while remapping $relPath", t)
                     }
                 }
         }
