@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     api("com.google.code.gson:gson:2.10.1")
-    api("xyz.xenondevs.commons:commons-gson:1.0-SNAPSHOT")
+    api("xyz.xenondevs.commons:commons-gson:1.9")
 }
 
 publishing {

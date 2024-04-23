@@ -8,7 +8,7 @@ include("string-remapper-gradle-plugin")
 dependencyResolutionManagement { 
     versionCatalogs { 
         create("libs") {
-            version("kotlin", "1.8.20")
+            version("kotlin", "1.9.23")
         
             plugin("kotlin", "org.jetbrains.kotlin.jvm").versionRef("kotlin")
             

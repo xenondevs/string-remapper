@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     api(project(":string-remapper-mappings"))
-    implementation("xyz.xenondevs.bytebase:ByteBase:0.4.4")
+    implementation("xyz.xenondevs.bytebase:ByteBase:0.4.7")
 }
 
 publishing {
