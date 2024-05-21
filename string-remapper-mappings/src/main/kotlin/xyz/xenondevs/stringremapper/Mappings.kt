@@ -148,7 +148,8 @@ class Mappings(
     
     companion object {
         
-        private const val SPIGOT_MAPPINGS_URL = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/raw/mappings/bukkit-%s-cl.csrg"
+        private const val SPIGOT_VERSION_INFO_URL = "https://hub.spigotmc.org/versions/%s.json"
+        private const val BUILD_DATA_STASH_URL = "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/raw"
         private const val VERSION_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json"
         
         fun downloadMappings(version: String, dir: File): Pair<File, File> =
@@ -163,9 +164,10 @@ class Mappings(
         }
         
         fun downloadMappings(version: String, mojangMappingsFile: File, spigotMappingsFile: File) =
-            downloadMappings(version, spigotMappingsFile.toPath(), mojangMappingsFile.toPath())
+            downloadMappings(version, mojangMappingsFile.toPath(), spigotMappingsFile.toPath())
         
         fun downloadMappings(version: String, mojangMappingsFile: Path, spigotMappingsFile: Path) {
+            // Mojang mappings
             val versionManifest = URL(VERSION_MANIFEST_URL).openStream().parseJson() as JsonObject
             val versionUrl = versionManifest.getArray("versions")
                 .map { it as JsonObject }
@@ -173,9 +175,14 @@ class Mappings(
                 .getString("url")
             val versionObj = URL(versionUrl).openStream().parseJson() as JsonObject
             val serverMappingsUrl = versionObj.getObject("downloads").getObject("server_mappings").getString("url")
-            
             mojangMappingsFile.writeText(URL(serverMappingsUrl).readText())
-            spigotMappingsFile.writeText(URL(SPIGOT_MAPPINGS_URL.format(version)).readText())
+            
+            // Spigot mappings
+            val versionInfo = URL(SPIGOT_VERSION_INFO_URL.format(version)).openStream().parseJson() as JsonObject
+            val commit = versionInfo.getObject("refs").getString("BuildData")
+            val buildDataInfo = URL("$BUILD_DATA_STASH_URL/info.json?at=$commit").openStream().parseJson() as JsonObject
+            val classMappingsFile = buildDataInfo.getString("classMappings")
+            spigotMappingsFile.writeText(URL("$BUILD_DATA_STASH_URL/mappings/$classMappingsFile?at=$commit").readText())
         }
         
         fun load(mojangMappingsFile: File, spigotMappingsFile: File): Mappings =
